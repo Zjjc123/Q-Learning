@@ -1,1 +1,1 @@
-Simple Q-Learning Frozen Lake
+Q Learning - Jason Zhang
