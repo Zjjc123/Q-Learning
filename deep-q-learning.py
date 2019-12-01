@@ -76,11 +76,19 @@ class DQN(nn.Module): # extend the nn.Module class by pytorch
     def __init__(self, img_height, img_width):
         super().__init__()
 
-        # Two fully connected and one output
+        self.img_height = img_height
+        self.img_width = img_width
+        
+        print("Height", img_height, "Width", img_width)
+        # convolution
+        self.conv1 = torch.nn.Conv2d(3, 18, kernel_size=3, stride=1, padding=1)
+        #self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         # height * width * channel (3)
-        self.fc1 = nn.Linear(in_features = img_height * img_width * 3, out_features = 24)
+        self.fc1 = nn.Linear(in_features = img_height * img_width * 18, out_features = 24)
         # Dense layers
         self.fc2 = nn.Linear(in_features = 24, out_features = 32)
+        # Dense layers
+        self.fc3 = nn.Linear(in_features = 32, out_features = 32)
         # 2 output --> left or right 
         self.out = nn.Linear(in_features = 32, out_features = 2)
     
@@ -88,11 +96,19 @@ class DQN(nn.Module): # extend the nn.Module class by pytorch
     # tensor is passed in as t
     def forward(self, t):
         # flattened
-        t = t.flatten(start_dim = 1)
+        # t = t.flatten(start_dim = 1)
+
+        t = F.relu(self.conv1(t))
+        #t = self.pool(t)
+
+        t = t.view(-1, 18 * self.img_width * self.img_height)
+
         # pass through the first layer --> rectified linear unit (activation)
         t = F.relu(self.fc1(t))
         # pass through the second layer
         t = F.relu(self.fc2(t))
+        # pass through the third layer
+        t = F.relu(self.fc3(t))
         # pass through the output layer
         t = self.out(t)
         return t
